@@ -5,26 +5,27 @@ import re
 import multiprocessing
 import time
 
-import sys
-import pyjson5 # pip3 install pyjson5
-# You may need to remove this comment
-#sys.path.append("/usr/lib/python3/dist-packages/pyjson5")
-# You can find the path here pip3 show pyjson5 in
+# Because of my skill issues(?)
+# You may need to remove this comment and put your path
+#sys.path.append("<path>/pyjson5")
+# You can find the path with pip3 show pyjson5 in Location
 # [...]
 # Location: /usr/lib/python3/dist-packages
 # [...]
+import pyjson5 # pip3 install pyjson5==1.6.6
+
 usage_text = '''
 ####
 #
 # Proxy (refactoring)
-# Made by: sandrulino - Last update: 15 june 2022
+# Made by: sandrulino - Last update: 04 june 2024
 ##########################################################################################################################
 # 
 # If You are using docker, use this proxy outside docker NOT inside! (because of enable_proxy & disable_proxy functions)
 # Sudo permissions are needed.
 #
 # Usage:
-# python rproxy.py
+# python3 multiprocess_proxy.py
 # \t[ -h | -help | -u | -usage ] # Shows this message
 # \t[-ip] # Starts proxy server with the given ip. If no ip is given, a default one is used (10.0.2.15). If services.json is not found a default one is created.
 # \t[-reset] # After a confirmation, services.json is resetted
@@ -58,11 +59,11 @@ usage_text = '''
 tab = ""
 
 class colors:
-    GREEN = '\033[92m' #OK
-    YELLOW = '\033[93m' #WARNING
-    RED = '\033[91m' #FAIL
-    BLUE = '\u001b[34m' #INFO
-    RESET = '\033[0m' #RESET COLOR
+    GREEN = '\033[92m' # OK
+    YELLOW = '\033[93m' # WARNING
+    RED = '\033[91m' # FAIL
+    BLUE = '\u001b[34m' # INFO
+    RESET = '\033[0m' # RESET COLOR
     BOLD = "\033[1m" # BOLD
 
 def colored_print(my_string, color_me, text_color):
@@ -87,10 +88,10 @@ class my_client_handler():
         self.rcv = 0
         self.denied = False
 
-    #Loop function
+    # Loop function
     async def handle_client(self, local_reader, local_writer):
 
-        #Check if updates are needed
+        # Check if updates are needed
         if self.check4updates[self.service_name] == "update":
             colored_print("[" + self.service_name + "] Updating banning rules. . .", self.service_name, colors.BLUE)
             try:
@@ -110,9 +111,9 @@ class my_client_handler():
 
             port = local_writer.get_extra_info("socket").getsockname()[1] #Getting proxy (request) port
 
-            srcport = None #Real service port
+            srcport = None # Real service port
 
-            #Getting service by proxy port
+            # Getting service by proxy port
             if self.service["proxyport"] == port:
                 srcport = self.service["port"]
 
@@ -126,7 +127,7 @@ class my_client_handler():
                 colored_print("[" + self.service_name + "] Proxy port ("+ str(self.err) +"): " + str(port) + " not found. You may set bad services. Please do not change services' port and proxy port after starting proxy also", self.service_name, colors.RED)
                 return
 
-            #Trying to access a banned port == >:D Drop
+            # Trying to access a banned port == >:D Drop
             if self.service["type"] == "ban":
                 self.bans += 1
                 colored_print("[" + self.service_name + "] Banned port ("+str(self.bans)+"): " + str(self.service["port"]), self.service_name, colors.RED)
@@ -135,7 +136,7 @@ class my_client_handler():
             remote_reader, remote_writer = await asyncio.open_connection(
                 "127.0.0.1", srcport)
 
-            #Debug porpuse
+            # Debug porpuse
             #print(local_writer.get_extra_info("socket"))
             self.denied = False
 
@@ -159,17 +160,17 @@ class my_client_handler():
             while not reader.at_eof():
                 buf = await reader.read(2048)
 
-                #Checking rules, everything must be in byte ( str.encode(b) )
-                #Connection is closed by raise
+                # Checking rules, everything must be in byte ( str.encode(b) )
+                # Connection is closed by raise
 
-                #Checking general banned strings
+                # Checking general banned strings
                 for b in self.gen_banned:
                     if byte_to_uppercase(str.encode(b)) in byte_to_uppercase(buf):
                         self.bans += 1
                         colored_print("[" + self.service_name + "] General banned string has been found ("+ str(self.bans) +"): " + b, self.service_name, colors.RED)
                         raise
                         
-                #Checking general regular expression
+                # Checking general regular expression
                 for b in self.gen_match_banned:
                     z = re.compile(str.encode(b))
                     z = z.match(buf)
@@ -184,7 +185,7 @@ class my_client_handler():
                         colored_print("[" + self.service_name + "] Type banned string has been found ("+ str(self.bans) +"): " + b, self.service_name, colors.RED)
                         raise
                 
-                #Checking type banned regex
+                # Checking type banned regex
                 for b in self.type_match_banned:
                     z = re.compile(str.encode(b))
                     z = z.match(buf)
@@ -193,14 +194,14 @@ class my_client_handler():
                         colored_print("[" + self.service_name + "] Type banned regex has been found ("+ str(self.bans) +"): " + b, self.service_name, colors.RED)
                         raise
 
-                #Checking services banned strings
+                # Checking services banned strings
                 for b in self.service["banned"]:
                     if byte_to_uppercase(str.encode(b)) in byte_to_uppercase(buf):
                         self.bans += 1
                         colored_print("[" + self.service_name + "] Service's banned string has been found ("+ str(self.bans) +"): " + b, self.service_name, colors.RED)
                         raise
 
-                #Checking services banned regex  
+                # Checking services banned regex  
                 for b in self.service["match_banned"]:
                     z = re.compile(str.encode(b))
                     z = z.match(buf)
@@ -212,7 +213,7 @@ class my_client_handler():
                 writer.write(buf)
 
         except Exception:
-            #Debug porpuse
+            # Debug porpuse
             #import traceback
             #traceback.print_exc()
             self.denied = True
@@ -227,7 +228,7 @@ class my_client_handler():
         finally:
             writer.close()
 
-#Byte to uppercase
+# Byte to uppercase
 def byte_to_uppercase(byte_to_upper):
     out = b""
     for b in byte_to_upper:
@@ -237,7 +238,7 @@ def byte_to_uppercase(byte_to_upper):
             out += chr(b).encode()
     return out
 
-#Generate iptables. You may don't need to change this
+# Generate iptables. You may don't need to change this
 def build_cmds(services, src, proxyip):
     cmds = []
     for s in services:
@@ -247,21 +248,21 @@ def build_cmds(services, src, proxyip):
 
     return cmds
 
-#Enable proxy via iptables
+# Enable proxy via iptables
 def enable_proxy(services, src, proxyip):
     cmds = build_cmds(services, src, proxyip)
     for cmd in cmds:
         cmd = "sudo iptables -t nat -I " + cmd
         os.system(cmd)
 
-#Disable proxy via iptables
+# Disable proxy via iptables
 def disable_proxy(services, src, proxyip):
     cmds = build_cmds(services, src, proxyip)
     for cmd in cmds:
         cmd = "sudo iptables -t nat -D " + cmd 
         os.system(cmd)
 
-#Process function
+# Process function
 def proxy_service(service_name, service, ban_type, ban_match_type, gen_ban, gen_match_ban, check4updates, proxyip):
 
     colored_print("[PR0XY] Creating " + service_name + " proxy server. . .", "PR0XY", colors.BLUE)
@@ -345,7 +346,7 @@ def main():
         colored_print("[PR0XY] Warning, proxy has been started with example services. Consider to edit services.json", "PR0XY", colors.YELLOW)
         reset_services_json()    
     
-    check4updates = multiprocessing.Manager().dict() #check4updates[service_name] = "work" | "update"
+    check4updates = multiprocessing.Manager().dict() # check4updates[service_name] = "work" | "update"
 
     try:
         try:
@@ -356,9 +357,9 @@ def main():
             colored_print("[PR0XY] An error occurred while reading services.json. Please check services.json", "PR0XY", colors.RED)
             exit(1)
 
-        threads = {} #Dict of "threads" (they are process). There isn't thread.stop() in python, so process are used ( they have process.terminate() )
+        threads = {} # Dict of "threads" (they are process). There isn't thread.stop() in python, so process are used ( they have process.terminate() )
 
-        #For each service found, a process is created
+        # For each service found, a process is created
         for service_name in services['services']:
 
             check4updates[service_name] = "work"
@@ -387,11 +388,11 @@ def main():
                     services_file.close()
                     
                     remove_me = []
-                    #For each service active
+                    # For each service active
                     for service_name in threads.keys():
-                        #If is not in json file
+                        # If is not in json file
                         if service_name not in new_services['services']:
-                            #Disable it and stop it
+                            # Disable it and stop it
                             colored_print("[PR0XY] Closing " + service_name + " proxy server. . ." , "PR0XY", colors.BLUE)
                             disable_proxy({'services': services['services'][service_name]}, src, proxyip)
                             threads[service_name].terminate()
@@ -401,13 +402,13 @@ def main():
                     for service_name in remove_me:
                         del threads[service_name]
                             
-                    #For each service found
+                    # For each service found
                     for service_name in new_services['services']:
-                        #If already exists, check for updates needed
+                        # If already exists, check for updates needed
                         if service_name in threads.keys():
                             check4updates[service_name] = "update"
                             colored_print("[PR0XY] " + service_name + " is updating banning rules. . ." , "PR0XY", colors.BLUE)
-                            #If doesnt exists, his process is created and started
+                            # If doesnt exists, his process is created and started
                         elif service_name not in threads.keys():
                             check4updates[service_name] = "work"
                             
