@@ -12,7 +12,7 @@ Simple Python script that allows you to proxy http requests to multiple services
 - Case unsensitive string match ban list
 - Regex match ban list
 - Hex syntax compatible
-- Different types of ban rules (more info in [Usage/Examples](#UsageExamples))
+- Different types of ban rules (more info in [Usage/Examples](#Usage/Examples))
 
 ## Installation
 
@@ -71,7 +71,7 @@ You can start the proxy with
 sudo python3 multiprocess_proxy.py -ip <ip>
 ```
 
-If not found, a default configuration file `services.json` is gonna be created. You can find some example on how to edit that / or create a new one [here](#UsageExamples)
+If not found, a default configuration file `services.json` is gonna be created. You can find some example on how to edit that / or create a new one [here](#Usage/Examples)
 ## Running Tests
 
 To run tests, run the following command
@@ -96,7 +96,7 @@ curl <ip>:8000
 ```
 The response should be `curl: (52) Empty reply from server`
 
-Now that You have a (or multiple) service(s) and everything is working, You may check `services.json` and edit the file properly. Then You may enter `update` to update proxy rules. You can find some example on how to do that [here](#UsageExamples)
+Now that You have a (or multiple) service(s) and everything is working, You may check `services.json` and edit the file properly. Then You may enter `update` to update proxy rules. You can find some example on how to do that [here](#Usage/Examples)
 ## Usage/Examples
 
 In this example I have 3 services:
@@ -173,7 +173,7 @@ Prevents requests and drops responses to:
 - `Proxyport` **MUST be unique** between proxyports and ports
 - You can't edit `port` and / or `proxyport` after that service has been started. If You need to change them, You may restart proxy or edit the name too: the current service will be closed and a new one will be created with the new `port` and / or `proxyport` (and new name, You may want to change back again the name only)
 
-Example of custom type in `services.json`
+Another example of `services.json` with custom type 
 ```
 {
 	"services": {
@@ -203,11 +203,11 @@ Example of custom type in `services.json`
 	"gen_match_banned": [],
 	"type_banned": {
 		"crypto": [],
-        "customtype": []
+		"customtype": []
 	},
 	"type_match_banned": {
 		"crypto": [],
-        "customtype": []
+		"customtype": []
 	}
 }
 ```
