@@ -213,4 +213,4 @@ Another example of `services.json` with custom type
 ```
 ## Demo
 
-![](https://github.com/sandrulino01/ctf-tools/blob/main/http/multiprocess_proxy/demo/demo.gif)
+![](http/multiprocess_proxy/demo/demo.gif)
