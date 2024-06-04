@@ -213,4 +213,4 @@ Another example of `services.json` with custom type
 ```
 ## Demo
 
-![](/demo/demo.gif)
+![](/http/multiprocess_proxy/demo/demo.gif)
