@@ -408,7 +408,7 @@ def main():
                         if service_name in threads.keys():
                             check4updates[service_name] = "update"
                             colored_print("[PR0XY] " + service_name + " is updating banning rules. . ." , "PR0XY", colors.BLUE)
-                            # If doesnt exists, his process is created and started
+                        # If doesnt exists, his process is created and started
                         elif service_name not in threads.keys():
                             check4updates[service_name] = "work"
                             
