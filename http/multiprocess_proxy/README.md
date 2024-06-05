@@ -55,7 +55,7 @@ Get the multiprocess_proxy folder and go to the project directory
 
 Install dependencies: You can check how [here](#Installation)
 
-You may check if everything is fine with the following parameter. Usage text should appear with no errors.
+You may check if everything is fine with -u parameter. Usage text should appear with no errors.
 ```bash
 sudo python3 multiprocess_proxy.py -h
 ```
@@ -171,7 +171,7 @@ Prevents requests and drops responses to:
 
 - Service names (for example `PlsDontPwnMe`): indicates the name of the service
 - `type`: indicates the type of the service. Services are filtered with rules of its own type (if they exist)
-- `banned`: indicates banned strings. You may use hex syntax ("\x30" --> 0). Services are filtered by his own banned strings list. Checks are NOT case sensitive
+- `banned`: indicates banned strings. You may use hex syntax (`\x30` becomes `0`). Services are filtered by his own banned strings list. Checks are NOT case sensitive
 - `match_banned`: indicates banned regular expressions. Services are filtered by his own banned regular expressions list
 - `port`: indicates the service's port. You may check used port via
 ```bash
@@ -191,7 +191,7 @@ sudo docker ps
 - `Proxyport` **MUST be unique** between proxyports and ports
 - You can't edit `port` and / or `proxyport` after that service has been started. If You need to change them, You may restart proxy or edit the name too: the current service will be closed and a new one will be created with the new `port` and / or `proxyport` (and new name, You may want to change back again the name only)
 
-Another example of `services.json` with custom type 
+Another example of `services.json` while using a custom type 
 ```
 {
 	"services": {
