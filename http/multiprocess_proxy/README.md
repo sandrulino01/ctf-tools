@@ -55,7 +55,7 @@ Get the multiprocess_proxy folder and go to the project directory
 
 Install dependencies: You can check how [here](#Installation)
 
-You may check if everything is fine with -u parameter. Usage text should appear with no errors.
+You may check if everything is fine with -h parameter. Usage text should appear with no errors.
 ```bash
 sudo python3 multiprocess_proxy.py -h
 ```
