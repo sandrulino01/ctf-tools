@@ -55,6 +55,11 @@ Get the multiprocess_proxy folder and go to the project directory
 
 Install dependencies: You can check how [here](#Installation)
 
+You may check if everything is fine with the following parameter. Usage text should appear with no errors.
+```bash
+sudo python3 multiprocess_proxy.py -h
+```
+
 To start the proxy, You may use a custom ip but it's **IMPORTANT** that You **don't use 127.0.0.1 (or localhost and similar)**. You may check your machine ip via
 
 ```bash
@@ -72,6 +77,12 @@ sudo python3 multiprocess_proxy.py -ip <ip>
 ```
 
 If not found, a default configuration file `services.json` is gonna be created. You can find some example on how to edit that / or create a new one [here](#UsageExamples)
+
+You can reset `services.json` anytime via `-reset` parameter like
+```bash
+sudo python3 multiprocess_proxy.py -ip <ip> -reset
+```
+
 ## Running Tests
 
 To run tests, run the following command
@@ -162,7 +173,14 @@ Prevents requests and drops responses to:
 - `type`: indicates the type of the service. Services are filtered with rules of its own type (if they exist)
 - `banned`: indicates banned strings. You may use hex syntax ("\x30" --> 0). Services are filtered by his own banned strings list. Checks are NOT case sensitive
 - `match_banned`: indicates banned regular expressions. Services are filtered by his own banned regular expressions list
-- `port`: indicates the service's port. You may check used port via "sudo lsof -I -P -n | grep LISTEN" or "sudo docker ps"
+- `port`: indicates the service's port. You may check used port via
+```bash
+sudo lsof -I -P -n | grep LISTEN
+```
+or If your services are in docker
+```bash
+sudo docker ps
+```
 - `proxyport`: indicates the service's proxy port. You may use ports between 49152 and 65535
 
 #### IMPORTANT additional info
