@@ -160,7 +160,7 @@ The proxy uses a `services.json` file. This is an example.
 }
 ```
 Prevents requests and drops responses to:
-- Every request made with user agent `python-requests` or `curl` (be careful, this check is not done with request headers but It is with string match so a request with written `python-requests` or `curl` anywhere is blocked)
+- Every request made with user agent `python-requests` or `curl` (be careful, this check is not done with request headers but It is with string match so a request with written `User-Agent: python-requests` or `User-Agent: curl` anywhere is blocked)
 - Every request with these regex `(.)\\1{49,}` or `(.)\\1{49,}\xa8\xc3\x04\x08`
 - Requests to `pwn` services with `${IFS}` or `$IFS`
 - Requests to `web` services with `select` or `union` or `or` (with spaces before and after) or `where`
