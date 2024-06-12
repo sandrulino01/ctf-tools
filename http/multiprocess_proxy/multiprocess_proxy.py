@@ -444,3 +444,6 @@ def main():
   
 if __name__ == "__main__":
     main()
+else:
+    colored_print("[PR0XY] You must run this file as main file. Please run python3 multiprocess_proxy.py -h for more infos" , "PR0XY", colors.RED)
+    exit(1)
