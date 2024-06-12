@@ -18,7 +18,7 @@ usage_text = '''
 ####
 #
 # Proxy (refactoring)
-# Made by: sandrulino - Last update: 04 june 2024
+# Made by: sandrulino - Last update: 13 june 2024
 ##########################################################################################################################
 # 
 # If You are using docker, use this proxy outside docker NOT inside! (because of enable_proxy & disable_proxy functions)
