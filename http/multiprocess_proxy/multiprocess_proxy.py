@@ -5,6 +5,9 @@ import re
 import multiprocessing
 import time
 
+# Kill prevent
+import signal
+
 # Because of my skill issues(?)
 # You may need to remove this comment and put your path
 #sys.path.append("<path>/pyjson5")
@@ -263,7 +266,11 @@ def disable_proxy(services, src, proxyip):
         os.system(cmd)
 
 # Process function
-def proxy_service(service_name, service, ban_type, ban_match_type, gen_ban, gen_match_ban, check4updates, proxyip):
+def proxy_service(service_name, service, ban_type, ban_match_type, gen_ban, gen_match_ban, check4updates, proxyip, sigint_handler, sigterm_handler):
+
+    # Kill handling
+    signal.signal(signal.SIGINT, sigint_handler)
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
     colored_print("[PR0XY] Creating " + service_name + " proxy server. . .", "PR0XY", colors.BLUE)
     loop = asyncio.new_event_loop()
@@ -296,8 +303,46 @@ def reset_services_json():
 ##########################################################################################################################
 ### MAIN ###
 
+services = None
+src = None
+proxyip = None
+threads = None
+
+def cleanup():
+    global services
+    global src
+    global proxyip
+    global threads
+    disable_proxy(services['services'], src, proxyip)
+    for t in threads:
+        threads[t].terminate()
+
+def handle_signal(signum, frame):
+    if signum == signal.SIGTERM:
+        colored_print("[PR0XY] Received SIGTERM. Closing . . ." , "PR0XY", colors.RED)
+        cleanup()
+        error_code = 1
+    elif signum == signal.SIGINT:
+        colored_print("[PR0XY] Received SIGINT (Ctrl+C). Closing . . ." , "PR0XY", colors.BLUE)
+        error_code = 0
+    else:
+        colored_print("[PR0XY] Received {signum}. Closing . . ." , "PR0XY", colors.RED)
+        error_code = 1  # Error code for other signals
+        cleanup()
+    exit(error_code)
+
 def main(): 
     
+    # Kill handling
+    original_sigint_handler = signal.getsignal(signal.SIGINT)
+    original_sigterm_handler = signal.getsignal(signal.SIGTERM)
+    signal.signal(signal.SIGINT, handle_signal)
+    signal.signal(signal.SIGTERM, handle_signal)
+    global services
+    global src
+    global proxyip
+    global threads
+
     src = "10.0.2.15"
     ip_service = "127.0.0.1"
     proxyip = src
@@ -366,9 +411,9 @@ def main():
 
             if services['services'][service_name]['type'] != "ban":
             	threads[service_name] = multiprocessing.Process(target=
-            	proxy_service, args=(service_name, services['services'][service_name], services['type_banned'][services['services'][service_name]['type']], services['type_match_banned'][services['services'][service_name]['type']], services['gen_banned'], services['gen_match_banned'], check4updates, proxyip, ))
+            	proxy_service, args=(service_name, services['services'][service_name], services['type_banned'][services['services'][service_name]['type']], services['type_match_banned'][services['services'][service_name]['type']], services['gen_banned'], services['gen_match_banned'], check4updates, proxyip, original_sigint_handler, original_sigterm_handler, ))
             else:
-                threads[service_name] = multiprocessing.Process(target=proxy_service, args=(service_name, services['services'][service_name], None, None, None, None, check4updates, proxyip, ))
+                threads[service_name] = multiprocessing.Process(target=proxy_service, args=(service_name, services['services'][service_name], None, None, None, None, check4updates, proxyip, original_sigint_handler, original_sigterm_handler, ))
             threads[service_name].start()
     
         enable_proxy(services['services'], src, proxyip)
@@ -426,6 +471,7 @@ def main():
                     colored_print("[PR0XY] Something went wrong while updating services. You may check services.json and may restart proxy" , "PR0XY", colors.RED)
             
     except KeyboardInterrupt:
+        # this is now useless
         colored_print("[PR0XY] Ctrl-C detected" , "PR0XY", colors.BLUE)
         colored_print("[PR0XY] Stopping. . ." , "PR0XY", colors.BLUE)
 
