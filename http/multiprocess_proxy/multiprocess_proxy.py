@@ -5,8 +5,11 @@ import re
 import multiprocessing
 import time
 
-# Kill prevent
+# Kill handling
 import signal
+
+# Iptables snapshot
+from datetime import datetime
 
 # Because of my skill issues(?)
 # You may need to remove this comment and put your path
@@ -21,7 +24,7 @@ usage_text = '''
 ####
 #
 # Proxy (refactoring)
-# Made by: sandrulino - Last update: 13 june 2024
+# Made by: sandrulino
 ##########################################################################################################################
 # 
 # If You are using docker, use this proxy outside docker NOT inside! (because of enable_proxy & disable_proxy functions)
@@ -32,6 +35,7 @@ usage_text = '''
 # \t[ -h | -help | -u | -usage ] # Shows this message
 # \t[-ip] # Starts proxy server with the given ip. If no ip is given, a default one is used (10.0.2.15). If services.json is not found a default one is created.
 # \t[-reset] # After a confirmation, services.json is resetted
+# \t[-snapshot] # Do NOT create a backup of current iptables before starting the proxy
 #
 # services.json infos:
 # Every time services.json has been changed You need to use the "update" command
@@ -348,6 +352,7 @@ def main():
     proxyip = src
     reset = False
     ip2test = None
+    iptables_snapshot = True
 
     if len(sys.argv) > 1:
         
@@ -373,12 +378,32 @@ def main():
                 reset = True
                 continue
 
+            if "-snapshot" == sys.argv[i]:
+                iptables_snapshot = False
+                continue
+
     if ip2test is None:
         colored_print("[PR0XY] Warning, proxy is starting with default ip (" + src + ")", "PR0XY", colors.YELLOW)
 
     colored_print("[PR0XY] Starting. . .", "PR0XY", colors.BLUE)
+
+    if iptables_snapshot:
+        try:
+            if os.path.exists("snapshots") is not True:
+                os.system("mkdir snapshots")
+            os.system(f"sudo iptables-save > snapshots/iptables-snapshot-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.txt")
+            colored_print("[PR0XY] A new iptables snapshot has been taken!" , "PR0XY", colors.BLUE)
+        except:
+            while ans != "YeS!" and ans != "no":
+                colored_print("[PR0XY] Warning, an error occurred while taking an iptables snapshot. No backup has been taken. Do you want to proceed anyway? ( YeS! | no )", "PR0XY", colors.YELLOW)
+            if ans == "no":
+                colored_print("[PR0XY] Stopping. . ." , "PR0XY", colors.BLUE)
+                colored_print("[PR0XY] Proxy OFF", "PR0XY", colors.GREEN)
+                colored_print("[PR0XY] Done!" , "PR0XY", colors.GREEN)
+                exit(0)
+
     json_exists = os.path.exists("services.json")
-    
+
     if json_exists and reset:
         ans = ""
         while ans != "YeS!" and ans != "no":
@@ -483,7 +508,6 @@ def main():
         disable_proxy(services['services'], src, proxyip)
         for t in threads:
             threads[t].terminate()
-        
         colored_print("[PR0XY] Proxy OFF", "PR0XY", colors.GREEN)
         colored_print("[PR0XY] Done!" , "PR0XY", colors.GREEN)
         

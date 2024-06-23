@@ -3,7 +3,6 @@
 
 Simple Python script that allows you to proxy http requests to multiple services at the same time and block unwanted requests
 
-
 ## Features
 
 - Multiple ban rules applicable to different services at the same time (multi process script)
@@ -30,9 +29,9 @@ pip3 install pyjson5==1.6.6
 
 #### IMPORTANT
 
-Because of my skill issues(?)
+Because of my skill issues(?) 
 
-You may need to remove this comment and put your path
+If You run python3 with sudo, You may need to remove this comment and put your path
 ```python
 #sys.path.append("<path>/pyjson5")
 ```
@@ -49,6 +48,9 @@ The code would become this
 ```python
 sys.path.append("/usr/lib/python3/dist-packages/pyjson5")
 ```
+
+In alternative You may run the script without sudo permissions, They will be asked after startup
+
 ## How to run
 
 Get the multiprocess_proxy folder and go to the project directory
@@ -60,7 +62,7 @@ You may check if everything is fine with -h parameter. Usage text should appear 
 sudo python3 multiprocess_proxy.py -h
 ```
 
-To start the proxy, You may use a custom ip but it's **IMPORTANT** that You **don't use 127.0.0.1 (or localhost and similar)**. You may check your machine ip via
+To start the proxy, You may use your machine ip but it's **IMPORTANT** that You **don't use 127.0.0.1 (or localhost and similar)**. You may check your machine ip via
 
 ```bash
 ifconfig
@@ -82,6 +84,29 @@ You can reset `services.json` anytime via `-reset` parameter like
 ```bash
 sudo python3 multiprocess_proxy.py -ip <ip> -reset
 ```
+
+If you need to kill the proxy You may use this bash script
+```bash
+#!/bin/bash
+
+# Find processes' ID
+pids=$(pgrep -f "python3 multiprocess_proxy.py")
+
+# Kill processes
+if [ ! -z "$pids" ]; then
+  echo "PIDs killed: $pids"
+  kill $pids
+else
+  echo "No processes found"
+fi
+```
+Please remember to `chmod +x thiscript.sh` and run it via `./thiscript.sh`
+
+**DO NOT kill** the proxy with the `-9` flag: iptables need to be cleaned up before closing the proxy otherwise, a manual iptables restore will be necessary! To do so, You may use one of the snapshots created by the proxy
+
+If the `-snapshot` argument is NOT given, a snapshot of your iptables will be created in `snapshots/iptables-snapshot-%Y-%m-%d-%H:%M:%S.txt` before starting the proxy. You can also create one yourself via `sudo iptables-save > iptables-snapshot.txt`
+
+You can restore a snapshot anytime via: `sudo iptables-restore < iptables-snapshot-<timestamp>.txt`
 
 ## Running Tests
 
@@ -183,7 +208,7 @@ sudo docker ps
 ```
 - `proxyport`: indicates the service's proxy port. You may use ports between 49152 and 65535
 
-#### IMPORTANT additional info
+#### IMPORTANT `services.json` additional info
 
 - You may create as many `services` as You want but service names **MUST be unique**
 - You may create new types but they **MUST exist in** `type_banned` **and in** `type_match_banned`
